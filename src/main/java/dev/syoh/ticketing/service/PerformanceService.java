@@ -19,11 +19,11 @@ public class PerformanceService {
 
 	private final PerformanceRepository performanceRepository;
 
-	public List<Performance> retrieveAllPerformances() {
+	public List<Performance> readAll() {
 		return performanceRepository.findAll();
 	}
 
-	public Optional<Performance> retrievePerformanceById(long id) {
+	public Optional<Performance> readById(long id) {
 		return performanceRepository.findById(id);
 	}
 
@@ -31,20 +31,26 @@ public class PerformanceService {
 		return performanceRepository.save(performanceDto.toEntity());
 	}
 
-	public ResponseEntity<Performance> putPerformance(long id, PerformanceDto performanceDto) {
-		if (performanceRepository.existsById(id)) {
-			Performance existingPerformance = performanceRepository.findById(id).orElse(null);
-			if (existingPerformance != null) {
-				existingPerformance.setName(performanceDto.getName());
-				return new ResponseEntity<>(performanceRepository.save(existingPerformance), HttpStatus.OK);
-			}
-		} else {
-			performanceDto.setId(id);
-			return new ResponseEntity<>(performanceRepository.save(performanceDto.toEntity()), HttpStatus.CREATED);
-		}
-
-		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<Performance> update(long id, PerformanceDto performanceDto) {
+		return performanceRepository.findById(id)
+			.map(entity -> update(performanceDto, entity))
+			.orElseGet(() -> create(id, performanceDto));
 	}
+
+	private ResponseEntity<Performance> create(long id, PerformanceDto performanceDto) {
+		performanceDto.setId(id);
+		Performance updated = performanceRepository.save(performanceDto.toEntity());
+		return new ResponseEntity<>(updated, HttpStatus.NOT_FOUND);
+	}
+
+	private ResponseEntity<Performance> update(PerformanceDto performanceDto, Performance entity) {
+		entity.changeName(performanceDto.getName());
+		Performance saved =	performanceRepository.save(entity);
+		return new ResponseEntity<>(saved, HttpStatus.CREATED);
+	}
+
+
+
 
 	public void deletePerformance(long id) {
 		performanceRepository.deleteById(id);
