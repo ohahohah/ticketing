@@ -1,16 +1,10 @@
 package dev.syoh.ticketing.controller;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import dev.syoh.ticketing.domain.Performance;
 import dev.syoh.ticketing.dto.PerformanceDto;
@@ -26,28 +20,33 @@ public class PerformanceV1Controller {
 	private final PerformanceService performanceService;
 
 	@GetMapping
-	public Iterable<Performance> retrieveAllPerformances() {
-		return performanceService.retrieveAllPerformances();
+	public List<PerformanceDto> readAll() {
+		Iterable<Performance> performances = performanceService.readAll();
+		return StreamSupport.stream(performances.spliterator(), false)
+			.map(Performance::convertToDto)
+			.collect(Collectors.toList());
 	}
 
 	@GetMapping("/{id}")
-	public Optional<Performance> retrievePerformanceById(@PathVariable long id) {
-		return performanceService.retrievePerformanceById(id);
+	public PerformanceDto readById(@PathVariable long id) {
+		Performance performance = performanceService.readById(id).orElseThrow();
+		return performance.convertToDto();
 	}
 
 	@PostMapping
-	public Performance postPerformance(@RequestBody PerformanceDto performanceDto) {
-		return performanceService.postPerformance(performanceDto);
+	public PerformanceDto create(@RequestBody PerformanceDto performanceDto) {
+		Performance createdPerformance = performanceService.create(performanceDto);
+		return createdPerformance.convertToDto();
 	}
 
-	@PutMapping("/{id}")
-	public ResponseEntity<Performance> putPerformance(@PathVariable long id, @RequestBody PerformanceDto performanceDto) {
-		return performanceService.putPerformance(id, performanceDto);
+	@PutMapping
+	public PerformanceDto update(@RequestBody PerformanceDto performanceDto) {
+		Performance updatedPerformance = performanceService.update(performanceDto);
+		return updatedPerformance.convertToDto();
 	}
 
 	@DeleteMapping("/{id}")
-	public void deletePerformance(@PathVariable long id) {
+	public void delete(@PathVariable long id) {
 		performanceService.deletePerformance(id);
 	}
-
 }
