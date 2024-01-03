@@ -3,6 +3,8 @@ package dev.syoh.ticketing.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import dev.syoh.ticketing.domain.Performance;
@@ -29,10 +31,26 @@ public class PerformanceService {
 		return performanceRepository.save(performanceDto.toEntity());
 	}
 
-	public Performance update(PerformanceDto performanceDto) {
-		Performance performance = new Performance(performanceDto.getName());
-		return  performanceRepository.save(performance);
+	public Performance update(long id, PerformanceDto performanceDto) {
+		return performanceRepository.findById(id)
+			.map(entity -> update(performanceDto, entity))
+			.orElseGet(() -> create(id, performanceDto));
 	}
+
+	private Performance create(long id, PerformanceDto performanceDto) {
+		performanceDto.setId(id);
+		return performanceRepository.save(performanceDto.toEntity());
+	}
+
+	private Performance update(PerformanceDto performanceDto, Performance entity) {
+		entity.changeName(performanceDto.getName());
+		return performanceRepository.save(entity);
+	}
+
+
+
+
+
 
 	public void deletePerformance(long id) {
 		performanceRepository.deleteById(id);

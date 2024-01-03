@@ -41,7 +41,7 @@ public class PerformanceV1Controller {
 
 	@PutMapping
 	public PerformanceDto update(@RequestBody PerformanceDto performanceDto) {
-		Performance updatedPerformance = performanceService.update(performanceDto);
+		Performance updatedPerformance = performanceService.update(performanceDto.getId(), performanceDto);
 		return updatedPerformance.convertToDto();
 	}
 

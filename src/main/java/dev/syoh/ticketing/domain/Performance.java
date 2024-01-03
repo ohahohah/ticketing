@@ -23,6 +23,9 @@ public class Performance {
 		this.name = name;
 	}
 
+	public String readName() {
+		return this.name;
+	}
 	public void changeName(String name) {
 		this.name = name;
 	}
